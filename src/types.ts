@@ -8,17 +8,11 @@ export interface HandlerOptions {
 
 export interface UiHookPayload {
 	action: string;
-	clientState: any;
-	installationUrl: string;
-	projectId?: string | null;
-	query: {[key: string]: string | number | string[]};
-	slug: string;
+	query: { [key: string]: string | number | string[] };
 	integrationId: string;
-	configurationId: string;
-	teamId: string | null;
+	installationId: string;
+	organizationId: string | null;
 	token: string;
-	user: { id: string, username: string, email: string, name: string, profiles: any[], },
-	team?: { id: string, slug: string, name: string, description: string, } | null,
 }
 
 export interface FetchOptions extends RequestInit {
@@ -26,3 +20,9 @@ export interface FetchOptions extends RequestInit {
 }
 
 export { WelinaClient };
+
+export interface APIClass {
+	get: any,
+	post: any,
+	[key: string]: any;
+}

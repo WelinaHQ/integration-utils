@@ -3,6 +3,7 @@ import { json as getJsonBody, send } from 'micro';
 import { UiHookPayload, HandlerOptions } from './types';
 import WelinaClient from './welina-client';
 import uid from 'uid-promise';
+
 import { renderAST } from './htm';
 
 type Handler = (handlerOptions: HandlerOptions) => Promise<any>;
@@ -44,7 +45,7 @@ function getWelcomeMessage() {
 }
 
 export function withUiHook(handler: Handler) {
-	return async function(req: IncomingMessage, res: ServerResponse) {
+	return async function (req: IncomingMessage, res: ServerResponse) {
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.setHeader(
 			'Access-Control-Allow-Methods',
@@ -69,9 +70,10 @@ export function withUiHook(handler: Handler) {
 
 		try {
 			const payload = (await getJsonBody(req)) as UiHookPayload;
-			const { token, teamId, slug, integrationId, configurationId} = payload;
-			const welinaClient = new WelinaClient({ token, teamId, slug, integrationId, configurationId });
+			const { token, organizationId, integrationId, installationId } = payload;
+			const welinaClient = new WelinaClient({ token, organizationId, integrationId, installationId });
 			const output = await handler({ payload, welinaClient });
+
 			if (output.isAST === true) {
 				const renderedAST = renderAST(output);
 				return send(res, 200, renderedAST);

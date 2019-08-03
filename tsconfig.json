@@ -4,7 +4,7 @@
     "paths": { "*": ["types/*"] },
     "declaration": true,
     "esModuleInterop": true,
-    "lib": ["esnext"],
+    "lib": ["dom", "esnext"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmitOnError": true,

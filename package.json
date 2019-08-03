@@ -1,6 +1,6 @@
 {
   "name": "@welina/integration-utils",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "description": "A set of utlities for Welina Integrtions",
   "main": "lib/index.js",
   "files": [
@@ -12,20 +12,37 @@
     "prepublishOnly": "yarn build",
     "build": "tsc",
     "watch": "tsc --watch",
-    "test": "tsc",
-    "prettier": "prettier --write --single-quote './{src,test}/**/*.ts'"
+    "test": "jest",
+    "prettier": "prettier --write --single-quote './{src,test}/**/*.ts'",
+    "publish": "npm publish --access public"
   },
   "devDependencies": {
+    "@types/aws4": "1.5.1",
+    "@types/got": "9.6.2",
+    "@types/graphql": "14.2.2",
+    "@types/jest": "24.0.15",
     "@types/micro": "7.3.3",
-    "@types/node": "11.12.0",
+    "@types/node": "12.6.8",
     "@types/node-fetch": "2.3.3",
+    "@types/zen-observable": "0.8.0",
+    "jest": "24.8.0",
     "prettier": "1.17.0",
-    "typescript": "3.3.4000"
+    "ts-jest": "24.0.2",
+    "ts-node": "8.3.0",
+    "typescript": "3.5.3"
   },
   "dependencies": {
+    "@types/request-promise": "4.1.44",
+    "aws-amplify": "1.1.32",
+    "aws4": "1.8.0",
+    "aws4fetch": "1.0.0",
+    "dot-prop": "5.1.0",
+    "got": "9.6.0",
     "htm": "2.1.1",
+    "lodash": "4.17.15",
     "micro": "9.3.4",
     "node-fetch": "2.5.0",
+    "request-promise": "4.2.4",
     "uid-promise": "1.1.0"
   }
- }
+}
