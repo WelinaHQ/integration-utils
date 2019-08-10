@@ -70,8 +70,8 @@ export function withUiHook(handler: Handler) {
 
 		try {
 			const payload = (await getJsonBody(req)) as UiHookPayload;
-			const { token, organizationId, integrationId, installationId } = payload;
-			const welinaClient = new WelinaClient({ token, organizationId, integrationId, installationId });
+			const { token, clientState = {}, organizationId, integrationId, installationId } = payload;
+			const welinaClient = new WelinaClient({ token, clientState, organizationId, integrationId, installationId });
 			const output = await handler({ payload, welinaClient });
 
 			if (output.isAST === true) {

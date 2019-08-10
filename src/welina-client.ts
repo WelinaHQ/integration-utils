@@ -3,6 +3,7 @@ import got from 'got';
 
 interface ClientOptions {
 	token: string;
+	clientState: { [key: string]: string | number | string[] };
 	integrationId: string;
 	installationId: string;
 	organizationId: string | null;

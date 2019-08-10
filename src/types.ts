@@ -8,6 +8,7 @@ export interface HandlerOptions {
 
 export interface UiHookPayload {
 	action: string;
+	clientState: { [key: string]: string | number | string[] };
 	query: { [key: string]: string | number | string[] };
 	integrationId: string;
 	installationId: string;
