@@ -1,4 +1,3 @@
-import aws4 from 'aws4';
 import got from 'got';
 
 interface ClientOptions {
@@ -29,11 +28,6 @@ interface fetchResponse {
 	metadata: Object;
 }
 
-const callIntegrationAPICredentials = {
-	accessKeyId: "AKIAS2V2EINFD746EGAO",
-	secretAccessKey: "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"
-}
-
 export default class WelinaClient {
 	options: ClientOptions;
 
@@ -46,14 +40,7 @@ export default class WelinaClient {
 
 		const awsClient = got.extend({
 			baseUrl: baseUrl,
-			headers: { 'X-Welina-Token': this.options.token },
-			hooks: {
-				beforeRequest: [
-					async options => {
-						aws4.sign(options, callIntegrationAPICredentials);
-					}
-				]
-			}
+			headers: { 'X-Welina-Token': this.options.token }
 		});
 
 		return awsClient(path, options);

@@ -1,6 +1,6 @@
 {
   "name": "@welina/integration-utils",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A set of utlities for Welina Integrtions",
   "main": "lib/index.js",
   "files": [
@@ -33,9 +33,6 @@
   },
   "dependencies": {
     "@types/request-promise": "4.1.44",
-    "aws-amplify": "1.1.32",
-    "aws4": "1.8.0",
-    "aws4fetch": "1.0.0",
     "dot-prop": "5.1.0",
     "got": "9.6.0",
     "htm": "2.1.1",
