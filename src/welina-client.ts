@@ -1,31 +1,12 @@
-import got from 'got';
+import { get } from 'dot-prop';
+import fetchImpl from 'node-fetch';
 
 interface ClientOptions {
 	token: string;
-	clientState: { [key: string]: string | number | string[] };
+	clientState: { [key: string]: any };
 	integrationId: string;
 	installationId: string;
 	organizationId: string | null;
-}
-
-interface RequestOptions {
-	host?: string;
-	path?: string;
-	region?: string;
-	service?: string;
-	headers?: { [header: string]: string | number | string[] | undefined; } | undefined;
-	signQuery?: boolean;
-	method?: string;
-	url?: string;
-	ecdhCurve?: string;
-	rejectUnauthorized?: boolean;
-	json?: Object | Array<any> | number | string | boolean | null;
-	body?: any;
-	responseType?: string;
-}
-
-interface fetchResponse {
-	metadata: Object;
 }
 
 export default class WelinaClient {
@@ -35,66 +16,79 @@ export default class WelinaClient {
 		this.options = options;
 	}
 
-	fetch(path: string, options: RequestOptions) {
-		let baseUrl = `https://eg4vfkb6jd.execute-api.eu-central-1.amazonaws.com/dev/`;
+	fetch(query: string, data?: { [key: string]: any } | null) {
+		const graphqlUrl = `https://welina-graphql.herokuapp.com/v1/graphql`;
 
-		const awsClient = got.extend({
-			baseUrl: baseUrl,
-			headers: { 'X-Welina-Token': this.options.token }
-		});
+		const opts = {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${this.options.token}`
+			},
+			body: data ? JSON.stringify({ query, variables: data }) : JSON.stringify({ query })
+		};
 
-		return awsClient(path, options);
+		return fetchImpl(graphqlUrl, opts)
 	}
 
-	async fetchAndThrow(path: string, options: RequestOptions) {
+	async fetchAndThrow(query: string, data?: { [key: string]: any } | null) {
 		try {
-			const res = await this.fetch(path, options);
-			return res.body as unknown as fetchResponse;
+			const res = await this.fetch(query, data);
+			return res.body as { [key: string]: any; };
 		} catch (error) {
 			console.log('error', error)
-			throw new Error(`Failed Welina API call. path: ${path}`);
+			throw new Error(`Failed Welina graphql call. query: ${query}`);
 		}
 	}
 
 	async getMetadata() {
-		const metadataApiEndpoint = `integrations/${
-			this.options.integrationId
-			}/installations/${
-			this.options.installationId
-			}/metadata`;
-		const response = await this.fetchAndThrow(metadataApiEndpoint, {
-			method: 'GET',
-			json: true,
-			responseType: 'json',
-		});
-		return response.metadata;
+		const query = `
+		{
+			installation(where: {installation_id: {_eq: ${this.options.installationId}}}) {
+				id
+				metadata
+				organisation_id
+				integration_id
+			}
+		}
+		`
+		const response = await this.fetchAndThrow(query);
+		return get(response, 'data.installation.metadata') || {};
 	}
 
 	updateMetadata(data: Object = {}) {
-		const metadataApiEndpoint = `integrations/${
-			this.options.integrationId
-			}/installations/${
-			this.options.installationId
-			}/metadata`;
-		return this.fetchAndThrow(metadataApiEndpoint, {
-			method: 'POST',
-			body: data,
-			json: true,
-			responseType: 'json',
-		});
+		const query = `
+		{
+			mutation($data: jsonb) {
+				update_installation(where: {id: {_eq: ${this.options.installationId}}}, _append: {metadata: $data}) {
+					returning {
+						metadata
+						id
+					}
+				}
+			}
+			
+		}
+		`
+
+		return this.fetchAndThrow(query, data);
 	}
 
 	setMetadata(data: Object = {}) {
-		const metadataApiEndpoint = `integrations/${
-			this.options.integrationId
-			}/installations/${
-			this.options.installationId
-			}/metadata`;
-		return this.fetchAndThrow(metadataApiEndpoint, {
-			method: 'POST',
-			body: data,
-			json: true,
-			responseType: 'json'
-		});
+		const query = `
+		{
+			mutation($data: jsonb) {
+				update_installation(where: {id: {_eq: ${this.options.installationId}}}, _set: {metadata: $data}) {
+					returning {
+						metadata
+						id
+					}
+				}
+			}
+			
+		}
+		`
+
+		return this.fetchAndThrow(query, data);
 	}
 }
