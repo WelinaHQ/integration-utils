@@ -16,8 +16,10 @@ export default class WelinaClient {
 		this.options = options;
 	}
 
-	fetch(query: string, data?: { [key: string]: any } | null) {
+	async fetch(query: string, variables?: { [key: string]: any } | null) {
 		const graphqlUrl = `https://welina-graphql.herokuapp.com/v1/graphql`;
+
+		const body = JSON.stringify({ query, variables });
 
 		const opts = {
 			method: "POST",
@@ -25,16 +27,16 @@ export default class WelinaClient {
 				"Content-Type": "application/json",
 				"Authorization": `Bearer ${this.options.token}`
 			},
-			body: data ? JSON.stringify({ query, variables: data }) : JSON.stringify({ query })
+			body
 		};
 
-		return fetchImpl(graphqlUrl, opts)
+		return fetchImpl(graphqlUrl, opts);
 	}
 
-	async fetchAndThrow(query: string, data?: { [key: string]: any } | null) {
+	async fetchAndThrow(query: string, variables?: { [key: string]: any } | null) {
 		try {
-			const res = await this.fetch(query, data);
-			return res.body as { [key: string]: any; };
+			const res = await this.fetch(query, variables);
+			return res.json();
 		} catch (error) {
 			console.log('error', error)
 			throw new Error(`Failed Welina graphql call. query: ${query}`);
@@ -42,53 +44,50 @@ export default class WelinaClient {
 	}
 
 	async getMetadata() {
+		const variables = { installationId: this.options.installationId };
 		const query = `
-		{
-			installation(where: {installation_id: {_eq: ${this.options.installationId}}}) {
-				id
-				metadata
-				organisation_id
-				integration_id
+			query($installationId: uuid!) {
+				installation_by_pk(id: $installationId) {
+					id
+					metadata
+					organisation_id
+					integration_id
+				}
 			}
-		}
 		`
-		const response = await this.fetchAndThrow(query);
-		return get(response, 'data.installation.metadata') || {};
+		const res = await this.fetchAndThrow(query, variables);
+		return get(res, 'data.installation_by_pk.metadata') || {};
 	}
 
 	updateMetadata(data: Object = {}) {
+		const variables = { installationId: this.options.installationId, data };
 		const query = `
-		{
-			mutation($data: jsonb) {
-				update_installation(where: {id: {_eq: ${this.options.installationId}}}, _append: {metadata: $data}) {
+			mutation($data: jsonb, $installationId: uuid!) {
+				update_installation(where: {id: {_eq: $installationId}}, _append: {metadata: $data}) {
 					returning {
 						metadata
 						id
 					}
 				}
 			}
-			
-		}
 		`
 
-		return this.fetchAndThrow(query, data);
+		return this.fetchAndThrow(query, variables);
 	}
 
 	setMetadata(data: Object = {}) {
+		const variables = { installationId: this.options.installationId, data };
 		const query = `
-		{
-			mutation($data: jsonb) {
-				update_installation(where: {id: {_eq: ${this.options.installationId}}}, _set: {metadata: $data}) {
+			mutation($data: jsonb, $installationId: uuid!) {
+				update_installation(where: {id: {_eq: $installationId}}, _set: {metadata: $data}) {
 					returning {
 						metadata
 						id
 					}
 				}
 			}
-			
-		}
 		`
 
-		return this.fetchAndThrow(query, data);
+		return this.fetchAndThrow(query, variables);
 	}
 }
