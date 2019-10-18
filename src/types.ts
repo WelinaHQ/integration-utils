@@ -14,6 +14,7 @@ export interface UiHookPayload {
 	installationId: string;
 	organizationId: string | null;
 	token: string;
+	isStaging: boolean;
 }
 
 export interface FetchOptions extends RequestInit {

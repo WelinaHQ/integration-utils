@@ -7,6 +7,7 @@ interface ClientOptions {
 	integrationId: string;
 	installationId: string;
 	organizationId: string | null;
+	isStaging: boolean;
 }
 
 export default class WelinaClient {
@@ -16,8 +17,8 @@ export default class WelinaClient {
 		this.options = options;
 	}
 
-	async fetch(query: string, variables?: { [key: string]: any } | null) {
-		const graphqlUrl = `https://welina-graphql.herokuapp.com/v1/graphql`;
+	fetch(query: string, variables?: { [key: string]: any } | null) {
+		const graphqlUrl = this.options.isStaging ? `https://welina-graphql-dev.herokuapp.com/v1/graphql` : `https://graphql.welina.io/v1/graphql`;
 
 		const body = JSON.stringify({ query, variables });
 
@@ -38,7 +39,7 @@ export default class WelinaClient {
 			const res = await this.fetch(query, variables);
 			return res.json();
 		} catch (error) {
-			console.log('error', error)
+			console.log('error', error);
 			throw new Error(`Failed Welina graphql call. query: ${query}`);
 		}
 	}
