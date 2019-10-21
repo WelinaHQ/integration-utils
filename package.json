@@ -1,7 +1,7 @@
 {
   "name": "@welina/integration-utils",
-  "version": "0.3.0",
-  "description": "A set of utilities for Welina Integrtions",
+  "version": "0.4.3",
+  "description": "A set of utilities for Welina Integrations",
   "main": "lib/index.js",
   "files": [
     "lib"

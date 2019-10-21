@@ -44,6 +44,58 @@ function getWelcomeMessage() {
 	`
 }
 
+export function withClient(handler: Handler) {
+	return async function (req: IncomingMessage, res: ServerResponse) {
+		res.setHeader('Access-Control-Allow-Origin', '*');
+		res.setHeader(
+			'Access-Control-Allow-Methods',
+			'GET, POST, DELETE, OPTIONS'
+		);
+		res.setHeader(
+			'Access-Control-Allow-Headers',
+			'Authorization, Accept, Content-Type'
+		);
+
+		if (req.method === 'OPTIONS') {
+			return send(res, 200);
+		}
+
+		if (req.method === 'GET') {
+			return send(res, 200, getWelcomeMessage());
+		}
+
+		if (req.method !== 'POST') {
+			return send(res, 404, '404 - Not Found');
+		}
+
+		try {
+			const payload = (await getJsonBody(req)) as UiHookPayload;
+			const { token, clientState = {}, organizationId, integrationId, installationId, isStaging = false } = payload;
+			const welinaClient = new WelinaClient({ token, clientState, organizationId, integrationId, installationId, isStaging });
+			const output = await handler({ payload, welinaClient });
+
+			send(
+				res,
+				200,
+				output || { success: true }
+			);
+
+		} catch (error) {
+			const code = await uid(20);
+			console.error(`Error on hook withClient[${code}]: ${error.stack}`);
+
+			send(
+				res,
+				500,
+				{
+					errorCode: code,
+					stack: error.stack
+				}
+			);
+		}
+	};
+};
+
 export function withUiHook(handler: Handler) {
 	return async function (req: IncomingMessage, res: ServerResponse) {
 		res.setHeader('Access-Control-Allow-Origin', '*');

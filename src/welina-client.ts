@@ -17,16 +17,20 @@ export default class WelinaClient {
 		this.options = options;
 	}
 
-	fetch(query: string, variables?: { [key: string]: any } | null) {
+	fetch(
+		query: string,
+		variables?: { [key: string]: any } | null,
+		headers?: { [key: string]: any } | null
+	) {
 		const graphqlUrl = this.options.isStaging ? `https://welina-graphql-dev.herokuapp.com/v1/graphql` : `https://graphql.welina.io/v1/graphql`;
-
 		const body = JSON.stringify({ query, variables });
 
 		const opts = {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${this.options.token}`
+				"Authorization": `Bearer ${this.options.token}`,
+				...headers
 			},
 			body
 		};
@@ -34,12 +38,12 @@ export default class WelinaClient {
 		return fetchImpl(graphqlUrl, opts);
 	}
 
-	async fetchAndThrow(query: string, variables?: { [key: string]: any } | null) {
+	async fetchAndThrow(query: string, variables?: { [key: string]: any } | null, headers?: { [key: string]: any } | null) {
 		try {
-			const res = await this.fetch(query, variables);
+			const res = await this.fetch(query, variables, headers);
 			return res.json();
 		} catch (error) {
-			console.log('error', error);
+			console.log('fetch error', error);
 			throw new Error(`Failed Welina graphql call. query: ${query}`);
 		}
 	}
